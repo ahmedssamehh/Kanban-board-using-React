@@ -26,7 +26,7 @@ export const ACTIONS = {
     SYNC_FAILURE: 'SYNC_FAILURE',
     ROLLBACK: 'ROLLBACK',
     CLEAR_ERROR: 'CLEAR_ERROR',
-    
+
     // Conflict resolution
     SET_CONFLICTS: 'SET_CONFLICTS',
     RESOLVE_CONFLICT: 'RESOLVE_CONFLICT',
@@ -325,7 +325,7 @@ export function boardReducer(state, action) {
                 return {
                     ...state,
                     conflicts: state.conflicts.map((conflict, index) =>
-                        index === conflictIndex ? { ...conflict, resolution } : conflict
+                        index === conflictIndex ? {...conflict, resolution } : conflict
                     ),
                 };
             }
