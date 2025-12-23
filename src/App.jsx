@@ -4,6 +4,7 @@ import Toolbar from './components/Toolbar';
 import Board from './components/Board';
 import ErrorToast from './components/ErrorToast';
 import SyncIndicator from './components/SyncIndicator';
+import ConflictResolutionModal from './components/ConflictResolutionModal';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         </main>
         <SyncIndicator />
         <ErrorToast />
+        <ConflictResolutionModal />
       </div>
     </BoardProvider>
   );

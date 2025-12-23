@@ -26,6 +26,11 @@ export const ACTIONS = {
     SYNC_FAILURE: 'SYNC_FAILURE',
     ROLLBACK: 'ROLLBACK',
     CLEAR_ERROR: 'CLEAR_ERROR',
+    
+    // Conflict resolution
+    SET_CONFLICTS: 'SET_CONFLICTS',
+    RESOLVE_CONFLICT: 'RESOLVE_CONFLICT',
+    APPLY_MERGE: 'APPLY_MERGE',
 };
 
 // Initial state
@@ -37,6 +42,9 @@ export const initialState = {
     syncing: false,
     error: null,
     previousState: null,
+    baseState: null,
+    conflicts: [],
+    isOnline: navigator.onLine,
 };
 
 // Board reducer
@@ -50,6 +58,8 @@ export function boardReducer(state, action) {
                     order: state.lists.length,
                     archived: false,
                     createdAt: Date.now(),
+                    lastModifiedAt: Date.now(),
+                    version: 1,
                 };
                 return {
                     ...state,
@@ -67,7 +77,12 @@ export function boardReducer(state, action) {
                 return {
                     ...state,
                     lists: state.lists.map((list) =>
-                        list.id === action.payload.listId ? {...list, title: action.payload.title } :
+                        list.id === action.payload.listId ? {
+                            ...list,
+                            title: action.payload.title,
+                            lastModifiedAt: Date.now(),
+                            version: (list.version || 1) + 1,
+                        } :
                         list
                     ),
                     lastModified: Date.now(),
@@ -79,7 +94,12 @@ export function boardReducer(state, action) {
                 return {
                     ...state,
                     lists: state.lists.map((list) =>
-                        list.id === action.payload.listId ? {...list, archived: true } : list
+                        list.id === action.payload.listId ? {
+                            ...list,
+                            archived: true,
+                            lastModifiedAt: Date.now(),
+                            version: (list.version || 1) + 1,
+                        } : list
                     ),
                     lastModified: Date.now(),
                 };
@@ -90,7 +110,12 @@ export function boardReducer(state, action) {
                 return {
                     ...state,
                     lists: state.lists.map((list) =>
-                        list.id === action.payload.listId ? {...list, archived: false } :
+                        list.id === action.payload.listId ? {
+                            ...list,
+                            archived: false,
+                            lastModifiedAt: Date.now(),
+                            version: (list.version || 1) + 1,
+                        } :
                         list
                     ),
                     lastModified: Date.now(),
@@ -119,7 +144,8 @@ export function boardReducer(state, action) {
                     id: generateId(),
                     ...card,
                     createdAt: Date.now(),
-                    updatedAt: Date.now(),
+                    lastModifiedAt: Date.now(),
+                    version: 1,
                 };
                 return {
                     ...state,
@@ -139,7 +165,12 @@ export function boardReducer(state, action) {
                     cards: {
                         ...state.cards,
                         [listId]: state.cards[listId].map((card) =>
-                            card.id === cardId ? {...card, ...updates, updatedAt: Date.now() } :
+                            card.id === cardId ? {
+                                ...card,
+                                ...updates,
+                                lastModifiedAt: Date.now(),
+                                version: (card.version || 1) + 1,
+                            } :
                             card
                         ),
                     },
@@ -275,6 +306,40 @@ export function boardReducer(state, action) {
                 return {
                     ...state,
                     error: null,
+                };
+            }
+
+        case ACTIONS.SET_CONFLICTS:
+            {
+                return {
+                    ...state,
+                    conflicts: action.payload.conflicts,
+                    baseState: action.payload.baseState,
+                    syncing: false,
+                };
+            }
+
+        case ACTIONS.RESOLVE_CONFLICT:
+            {
+                const { conflictIndex, resolution } = action.payload;
+                return {
+                    ...state,
+                    conflicts: state.conflicts.map((conflict, index) =>
+                        index === conflictIndex ? { ...conflict, resolution } : conflict
+                    ),
+                };
+            }
+
+        case ACTIONS.APPLY_MERGE:
+            {
+                const { mergedState } = action.payload;
+                return {
+                    ...state,
+                    ...mergedState,
+                    conflicts: [],
+                    baseState: null,
+                    syncing: false,
+                    lastModified: Date.now(),
                 };
             }
 

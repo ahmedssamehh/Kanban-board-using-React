@@ -79,7 +79,24 @@ export const handlers = [
         const index = mockBoard.lists.findIndex((l) => l.id === listId);
 
         if (index !== -1) {
-            mockBoard.lists[index] = {...mockBoard.lists[index], ...body.updates };
+            const existingList = mockBoard.lists[index];
+            const clientVersion = body.updates.version;
+
+            // Check for version conflict
+            if (clientVersion && existingList.version && clientVersion < existingList.version) {
+                return HttpResponse.json({
+                    error: 'Version conflict',
+                    conflict: true,
+                    serverVersion: existingList,
+                }, { status: 409 });
+            }
+
+            mockBoard.lists[index] = {
+                ...existingList,
+                ...body.updates,
+                lastModifiedAt: Date.now(),
+                version: (existingList.version || 1) + 1,
+            };
             return HttpResponse.json({ success: true, data: mockBoard.lists[index] });
         }
 
@@ -136,7 +153,24 @@ export const handlers = [
         if (cards) {
             const index = cards.findIndex((c) => c.id === cardId);
             if (index !== -1) {
-                cards[index] = {...cards[index], ...updates };
+                const existingCard = cards[index];
+                const clientVersion = updates.version;
+
+                // Check for version conflict
+                if (clientVersion && existingCard.version && clientVersion < existingCard.version) {
+                    return HttpResponse.json({
+                        error: 'Version conflict',
+                        conflict: true,
+                        serverVersion: existingCard,
+                    }, { status: 409 });
+                }
+
+                cards[index] = {
+                    ...existingCard,
+                    ...updates,
+                    lastModifiedAt: Date.now(),
+                    version: (existingCard.version || 1) + 1,
+                };
                 return HttpResponse.json({ success: true, data: cards[index] });
             }
         }
@@ -179,7 +213,7 @@ export const handlers = [
 
         // Find and remove card from source
         const sourceCards = mockBoard.cards[sourceListId];
-        const cardIndex = sourceCards ? .findIndex((c) => c.id === cardId);
+        const cardIndex = sourceCards?.findIndex((c) => c.id === cardId);
 
         if (cardIndex !== -1) {
             const [card] = sourceCards.splice(cardIndex, 1);
