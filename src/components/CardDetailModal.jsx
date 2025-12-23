@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useBoardState } from '../hooks/useBoardState';
 import { validateCardTitle, validateTag } from '../utils/validators';
+import { api } from '../services/api';
 
 function CardDetailModal({ card, listId, onClose }) {
-  const { dispatch, ACTIONS } = useBoardState();
+  const { dispatchWithOptimistic, ACTIONS } = useBoardState();
   const [title, setTitle] = useState(card.title);
   const [description, setDescription] = useState(card.description || '');
   const [tags, setTags] = useState(card.tags || []);
@@ -29,24 +30,30 @@ function CardDetailModal({ card, listId, onClose }) {
       return;
     }
 
-    dispatch({
-      type: ACTIONS.UPDATE_CARD,
-      payload: {
-        listId,
-        cardId: card.id,
-        updates: { title, description, tags },
+    dispatchWithOptimistic(
+      {
+        type: ACTIONS.UPDATE_CARD,
+        payload: {
+          listId,
+          cardId: card.id,
+          updates: { title, description, tags },
+        },
       },
-    });
+      () => api.updateCard(listId, card.id, { title, description, tags })
+    );
 
     onClose();
   };
 
   const handleDelete = () => {
     if (window.confirm('Delete this card?')) {
-      dispatch({
-        type: ACTIONS.DELETE_CARD,
-        payload: { listId, cardId: card.id },
-      });
+      dispatchWithOptimistic(
+        {
+          type: ACTIONS.DELETE_CARD,
+          payload: { listId, cardId: card.id },
+        },
+        () => api.deleteCard(listId, card.id)
+      );
       onClose();
     }
   };

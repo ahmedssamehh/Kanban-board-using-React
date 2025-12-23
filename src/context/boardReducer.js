@@ -19,6 +19,13 @@ export const ACTIONS = {
     // Board actions
     LOAD_BOARD: 'LOAD_BOARD',
     CLEAR_BOARD: 'CLEAR_BOARD',
+
+    // Sync actions
+    SYNC_START: 'SYNC_START',
+    SYNC_SUCCESS: 'SYNC_SUCCESS',
+    SYNC_FAILURE: 'SYNC_FAILURE',
+    ROLLBACK: 'ROLLBACK',
+    CLEAR_ERROR: 'CLEAR_ERROR',
 };
 
 // Initial state
@@ -27,6 +34,9 @@ export const initialState = {
     cards: {},
     boardTitle: 'My Kanban Board',
     lastModified: Date.now(),
+    syncing: false,
+    error: null,
+    previousState: null,
 };
 
 // Board reducer
@@ -211,6 +221,62 @@ export function boardReducer(state, action) {
                 return {
                     ...initialState,
                     lastModified: Date.now(),
+                };
+            }
+
+        case ACTIONS.SYNC_START:
+            {
+                return {
+                    ...state,
+                    syncing: true,
+                    error: null,
+                    previousState: {
+                        lists: state.lists,
+                        cards: state.cards,
+                        boardTitle: state.boardTitle,
+                    },
+                };
+            }
+
+        case ACTIONS.SYNC_SUCCESS:
+            {
+                return {
+                    ...state,
+                    syncing: false,
+                    previousState: null,
+                };
+            }
+
+        case ACTIONS.SYNC_FAILURE:
+            {
+                return {
+                    ...state,
+                    syncing: false,
+                    error: action.payload.error,
+                };
+            }
+
+        case ACTIONS.ROLLBACK:
+            {
+                if (!state.previousState) {
+                    return state;
+                }
+                return {
+                    ...state,
+                    lists: state.previousState.lists,
+                    cards: state.previousState.cards,
+                    boardTitle: state.previousState.boardTitle,
+                    syncing: false,
+                    previousState: null,
+                    lastModified: Date.now(),
+                };
+            }
+
+        case ACTIONS.CLEAR_ERROR:
+            {
+                return {
+                    ...state,
+                    error: null,
                 };
             }
 

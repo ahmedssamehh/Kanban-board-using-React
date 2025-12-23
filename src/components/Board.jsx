@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { useBoardState } from '../hooks/useBoardState';
 import ListColumn from './ListColumn';
 import { validateListTitle } from '../utils/validators';
+import { api } from '../services/api';
+import { generateId } from '../utils/helpers';
 
 function Board() {
-  const { state, dispatch, ACTIONS } = useBoardState();
+  const { state, dispatchWithOptimistic, ACTIONS } = useBoardState();
   const [newListTitle, setNewListTitle] = useState('');
   const [isAddingList, setIsAddingList] = useState(false);
 
@@ -19,10 +21,21 @@ function Board() {
       return;
     }
 
-    dispatch({
-      type: ACTIONS.ADD_LIST,
-      payload: { title: newListTitle },
-    });
+    const newList = {
+      id: generateId(),
+      title: newListTitle,
+      order: state.lists.length,
+      archived: false,
+      createdAt: Date.now(),
+    };
+
+    dispatchWithOptimistic(
+      {
+        type: ACTIONS.ADD_LIST,
+        payload: { title: newListTitle },
+      },
+      () => api.addList(newList)
+    );
 
     setNewListTitle('');
     setIsAddingList(false);

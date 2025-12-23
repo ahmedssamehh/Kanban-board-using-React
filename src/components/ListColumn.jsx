@@ -2,9 +2,11 @@ import { useState, useCallback } from 'react';
 import { useBoardState } from '../hooks/useBoardState';
 import Card from './Card';
 import { validateListTitle, validateCardTitle } from '../utils/validators';
+import { api } from '../services/api';
+import { generateId } from '../utils/helpers';
 
 function ListColumn({ list }) {
-  const { state, dispatch, ACTIONS } = useBoardState();
+  const { state, dispatch, dispatchWithOptimistic, ACTIONS } = useBoardState();
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [listTitle, setListTitle] = useState(list.title);
   const [isAddingCard, setIsAddingCard] = useState(false);
@@ -28,22 +30,28 @@ function ListColumn({ list }) {
       return;
     }
 
-    dispatch({
-      type: ACTIONS.RENAME_LIST,
-      payload: { listId: list.id, title: listTitle.trim() },
-    });
+    dispatchWithOptimistic(
+      {
+        type: ACTIONS.RENAME_LIST,
+        payload: { listId: list.id, title: listTitle.trim() },
+      },
+      () => api.updateList(list.id, { title: listTitle.trim() })
+    );
     setIsEditingTitle(false);
-  }, [listTitle, list.title, list.id, dispatch, ACTIONS]);
+  }, [listTitle, list.title, list.id, dispatchWithOptimistic, ACTIONS]);
 
   const handleArchiveList = useCallback(() => {
     if (window.confirm(`Archive "${list.title}"?`)) {
-      dispatch({
-        type: ACTIONS.ARCHIVE_LIST,
-        payload: { listId: list.id },
-      });
+      dispatchWithOptimistic(
+        {
+          type: ACTIONS.ARCHIVE_LIST,
+          payload: { listId: list.id },
+        },
+        () => api.updateList(list.id, { archived: true })
+      );
     }
     setShowMenu(false);
-  }, [list.title, list.id, dispatch, ACTIONS]);
+  }, [list.title, list.id, dispatchWithOptimistic, ACTIONS]);
 
   const handleAddCard = useCallback(() => {
     if (!newCardTitle.trim()) return;
@@ -54,21 +62,28 @@ function ListColumn({ list }) {
       return;
     }
 
-    dispatch({
-      type: ACTIONS.ADD_CARD,
-      payload: {
-        listId: list.id,
-        card: {
-          title: newCardTitle.trim(),
-          description: '',
-          tags: [],
+    const newCard = {
+      id: generateId(),
+      title: newCardTitle.trim(),
+      description: '',
+      tags: [],
+      createdAt: Date.now(),
+    };
+
+    dispatchWithOptimistic(
+      {
+        type: ACTIONS.ADD_CARD,
+        payload: {
+          listId: list.id,
+          card: newCard,
         },
       },
-    });
+      () => api.addCard(list.id, newCard)
+    );
 
     setNewCardTitle('');
     setIsAddingCard(false);
-  }, [newCardTitle, list.id, dispatch, ACTIONS]);
+  }, [newCardTitle, list.id, dispatchWithOptimistic, ACTIONS]);
 
   const handleCardKeyDown = (e) => {
     if (e.key === 'Enter') {
@@ -112,15 +127,18 @@ function ListColumn({ list }) {
         return; // Same list, no action needed
       }
 
-      dispatch({
-        type: ACTIONS.MOVE_CARD,
-        payload: {
-          sourceListId,
-          destinationListId: list.id,
-          cardId,
-          destinationIndex: cards.length,
+      dispatchWithOptimistic(
+        {
+          type: ACTIONS.MOVE_CARD,
+          payload: {
+            sourceListId,
+            destinationListId: list.id,
+            cardId,
+            destinationIndex: cards.length,
+          },
         },
-      });
+        () => api.moveCard(sourceListId, list.id, cardId, cards.length)
+      );
     } catch (error) {
       // Error handling for drop
     }
