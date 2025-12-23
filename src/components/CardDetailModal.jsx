@@ -1,8 +1,6 @@
 function CardDetailModal() {
   return (
-    <div className="card-detail-modal">
-      {/* CardDetailModal component */}
-    </div>
+    <div className="card-detail-modal">{/* CardDetailModal component */}</div>
   );
 }
 

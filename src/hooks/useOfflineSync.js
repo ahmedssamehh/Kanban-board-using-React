@@ -1,4 +1,4 @@
 // Custom hook for offline synchronization
 export function useOfflineSync() {
-    // Implementation will be added
+  // Implementation will be added
 }
