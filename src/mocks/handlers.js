@@ -2,229 +2,202 @@ import { http, HttpResponse, delay } from 'msw';
 
 // Simulated database
 let mockBoard = {
-  lists: [],
-  cards: {},
+    lists: [],
+    cards: {},
 };
 
 // Configuration for testing
 const CONFIG = {
-  NETWORK_DELAY: 500, // Simulate network delay (ms)
-  FAILURE_RATE: 0.1, // 10% chance of failure
-  ENABLE_FAILURES: false, // Set to true to test error handling
+    NETWORK_DELAY: 500, // Simulate network delay (ms)
+    FAILURE_RATE: 0.1, // 10% chance of failure
+    ENABLE_FAILURES: false, // Set to true to test error handling
 };
 
 // Helper to simulate failures
 const shouldFail = () => {
-  // Check sessionStorage for runtime configuration
-  if (typeof window !== 'undefined') {
-    const enableFailures = sessionStorage.getItem('MSW_ENABLE_FAILURES');
-    if (enableFailures === 'true') {
-      return Math.random() < CONFIG.FAILURE_RATE;
+    // Check sessionStorage for runtime configuration
+    if (typeof window !== 'undefined') {
+        const enableFailures = sessionStorage.getItem('MSW_ENABLE_FAILURES');
+        if (enableFailures === 'true') {
+            return Math.random() < CONFIG.FAILURE_RATE;
+        }
     }
-  }
-  return CONFIG.ENABLE_FAILURES && Math.random() < CONFIG.FAILURE_RATE;
+    return CONFIG.ENABLE_FAILURES && Math.random() < CONFIG.FAILURE_RATE;
 };
 
 export const handlers = [
-  // Get board state
-  http.get('/api/board', async () => {
-    await delay(CONFIG.NETWORK_DELAY);
-    
-    if (shouldFail()) {
-      return HttpResponse.json(
-        { error: 'Failed to fetch board' },
-        { status: 500 }
-      );
-    }
+    // Get board state
+    http.get('/api/board', async() => {
+        await delay(CONFIG.NETWORK_DELAY);
 
-    return HttpResponse.json(mockBoard);
-  }),
+        if (shouldFail()) {
+            return HttpResponse.json({ error: 'Failed to fetch board' }, { status: 500 });
+        }
 
-  // Save entire board state
-  http.post('/api/board', async ({ request }) => {
-    await delay(CONFIG.NETWORK_DELAY);
+        return HttpResponse.json(mockBoard);
+    }),
 
-    if (shouldFail()) {
-      return HttpResponse.json(
-        { error: 'Failed to save board' },
-        { status: 500 }
-      );
-    }
+    // Save entire board state
+    http.post('/api/board', async({ request }) => {
+        await delay(CONFIG.NETWORK_DELAY);
 
-    const body = await request.json();
-    mockBoard = body;
-    return HttpResponse.json({ success: true, data: mockBoard });
-  }),
+        if (shouldFail()) {
+            return HttpResponse.json({ error: 'Failed to save board' }, { status: 500 });
+        }
 
-  // Add list
-  http.post('/api/lists', async ({ request }) => {
-    await delay(CONFIG.NETWORK_DELAY);
+        const body = await request.json();
+        mockBoard = body;
+        return HttpResponse.json({ success: true, data: mockBoard });
+    }),
 
-    if (shouldFail()) {
-      return HttpResponse.json(
-        { error: 'Failed to create list' },
-        { status: 500 }
-      );
-    }
+    // Add list
+    http.post('/api/lists', async({ request }) => {
+        await delay(CONFIG.NETWORK_DELAY);
 
-    const body = await request.json();
-    const newList = body.list;
-    mockBoard.lists.push(newList);
-    mockBoard.cards[newList.id] = [];
-    
-    return HttpResponse.json({ success: true, data: newList });
-  }),
+        if (shouldFail()) {
+            return HttpResponse.json({ error: 'Failed to create list' }, { status: 500 });
+        }
 
-  // Update list
-  http.put('/api/lists/:listId', async ({ request, params }) => {
-    await delay(CONFIG.NETWORK_DELAY);
+        const body = await request.json();
+        const newList = body.list;
+        mockBoard.lists.push(newList);
+        mockBoard.cards[newList.id] = [];
 
-    if (shouldFail()) {
-      return HttpResponse.json(
-        { error: 'Failed to update list' },
-        { status: 500 }
-      );
-    }
+        return HttpResponse.json({ success: true, data: newList });
+    }),
 
-    const { listId } = params;
-    const body = await request.json();
-    const index = mockBoard.lists.findIndex((l) => l.id === listId);
-    
-    if (index !== -1) {
-      mockBoard.lists[index] = { ...mockBoard.lists[index], ...body.updates };
-      return HttpResponse.json({ success: true, data: mockBoard.lists[index] });
-    }
+    // Update list
+    http.put('/api/lists/:listId', async({ request, params }) => {
+        await delay(CONFIG.NETWORK_DELAY);
 
-    return HttpResponse.json({ error: 'List not found' }, { status: 404 });
-  }),
+        if (shouldFail()) {
+            return HttpResponse.json({ error: 'Failed to update list' }, { status: 500 });
+        }
 
-  // Delete list
-  http.delete('/api/lists/:listId', async ({ params }) => {
-    await delay(CONFIG.NETWORK_DELAY);
+        const { listId } = params;
+        const body = await request.json();
+        const index = mockBoard.lists.findIndex((l) => l.id === listId);
 
-    if (shouldFail()) {
-      return HttpResponse.json(
-        { error: 'Failed to delete list' },
-        { status: 500 }
-      );
-    }
+        if (index !== -1) {
+            mockBoard.lists[index] = {...mockBoard.lists[index], ...body.updates };
+            return HttpResponse.json({ success: true, data: mockBoard.lists[index] });
+        }
 
-    const { listId } = params;
-    mockBoard.lists = mockBoard.lists.filter((l) => l.id !== listId);
-    delete mockBoard.cards[listId];
-    
-    return HttpResponse.json({ success: true });
-  }),
+        return HttpResponse.json({ error: 'List not found' }, { status: 404 });
+    }),
 
-  // Add card
-  http.post('/api/cards', async ({ request }) => {
-    await delay(CONFIG.NETWORK_DELAY);
+    // Delete list
+    http.delete('/api/lists/:listId', async({ params }) => {
+        await delay(CONFIG.NETWORK_DELAY);
 
-    if (shouldFail()) {
-      return HttpResponse.json(
-        { error: 'Failed to create card' },
-        { status: 500 }
-      );
-    }
+        if (shouldFail()) {
+            return HttpResponse.json({ error: 'Failed to delete list' }, { status: 500 });
+        }
 
-    const body = await request.json();
-    const { listId, card } = body;
-    
-    if (!mockBoard.cards[listId]) {
-      mockBoard.cards[listId] = [];
-    }
-    
-    mockBoard.cards[listId].push(card);
-    return HttpResponse.json({ success: true, data: card });
-  }),
+        const { listId } = params;
+        mockBoard.lists = mockBoard.lists.filter((l) => l.id !== listId);
+        delete mockBoard.cards[listId];
 
-  // Update card
-  http.put('/api/cards/:cardId', async ({ request, params }) => {
-    await delay(CONFIG.NETWORK_DELAY);
+        return HttpResponse.json({ success: true });
+    }),
 
-    if (shouldFail()) {
-      return HttpResponse.json(
-        { error: 'Failed to update card' },
-        { status: 500 }
-      );
-    }
+    // Add card
+    http.post('/api/cards', async({ request }) => {
+        await delay(CONFIG.NETWORK_DELAY);
 
-    const { cardId } = params;
-    const body = await request.json();
-    const { listId, updates } = body;
-    
-    const cards = mockBoard.cards[listId];
-    if (cards) {
-      const index = cards.findIndex((c) => c.id === cardId);
-      if (index !== -1) {
-        cards[index] = { ...cards[index], ...updates };
-        return HttpResponse.json({ success: true, data: cards[index] });
-      }
-    }
+        if (shouldFail()) {
+            return HttpResponse.json({ error: 'Failed to create card' }, { status: 500 });
+        }
 
-    return HttpResponse.json({ error: 'Card not found' }, { status: 404 });
-  }),
+        const body = await request.json();
+        const { listId, card } = body;
 
-  // Delete card
-  http.delete('/api/cards/:cardId', async ({ request }) => {
-    await delay(CONFIG.NETWORK_DELAY);
+        if (!mockBoard.cards[listId]) {
+            mockBoard.cards[listId] = [];
+        }
 
-    if (shouldFail()) {
-      return HttpResponse.json(
-        { error: 'Failed to delete card' },
-        { status: 500 }
-      );
-    }
+        mockBoard.cards[listId].push(card);
+        return HttpResponse.json({ success: true, data: card });
+    }),
 
-    const url = new URL(request.url);
-    const listId = url.searchParams.get('listId');
-    const { cardId } = await request.json();
-    
-    if (mockBoard.cards[listId]) {
-      mockBoard.cards[listId] = mockBoard.cards[listId].filter(
-        (c) => c.id !== cardId
-      );
-      return HttpResponse.json({ success: true });
-    }
+    // Update card
+    http.put('/api/cards/:cardId', async({ request, params }) => {
+        await delay(CONFIG.NETWORK_DELAY);
 
-    return HttpResponse.json({ error: 'Card not found' }, { status: 404 });
-  }),
+        if (shouldFail()) {
+            return HttpResponse.json({ error: 'Failed to update card' }, { status: 500 });
+        }
 
-  // Move card
-  http.post('/api/cards/move', async ({ request }) => {
-    await delay(CONFIG.NETWORK_DELAY);
+        const { cardId } = params;
+        const body = await request.json();
+        const { listId, updates } = body;
 
-    if (shouldFail()) {
-      return HttpResponse.json(
-        { error: 'Failed to move card' },
-        { status: 500 }
-      );
-    }
+        const cards = mockBoard.cards[listId];
+        if (cards) {
+            const index = cards.findIndex((c) => c.id === cardId);
+            if (index !== -1) {
+                cards[index] = {...cards[index], ...updates };
+                return HttpResponse.json({ success: true, data: cards[index] });
+            }
+        }
 
-    const body = await request.json();
-    const { sourceListId, destinationListId, cardId, destinationIndex } = body;
-    
-    // Find and remove card from source
-    const sourceCards = mockBoard.cards[sourceListId];
-    const cardIndex = sourceCards?.findIndex((c) => c.id === cardId);
-    
-    if (cardIndex !== -1) {
-      const [card] = sourceCards.splice(cardIndex, 1);
-      
-      // Add to destination
-      if (!mockBoard.cards[destinationListId]) {
-        mockBoard.cards[destinationListId] = [];
-      }
-      mockBoard.cards[destinationListId].splice(destinationIndex, 0, card);
-      
-      return HttpResponse.json({ success: true });
-    }
+        return HttpResponse.json({ error: 'Card not found' }, { status: 404 });
+    }),
 
-    return HttpResponse.json({ error: 'Card not found' }, { status: 404 });
-  }),
+    // Delete card
+    http.delete('/api/cards/:cardId', async({ request }) => {
+        await delay(CONFIG.NETWORK_DELAY);
+
+        if (shouldFail()) {
+            return HttpResponse.json({ error: 'Failed to delete card' }, { status: 500 });
+        }
+
+        const url = new URL(request.url);
+        const listId = url.searchParams.get('listId');
+        const { cardId } = await request.json();
+
+        if (mockBoard.cards[listId]) {
+            mockBoard.cards[listId] = mockBoard.cards[listId].filter(
+                (c) => c.id !== cardId
+            );
+            return HttpResponse.json({ success: true });
+        }
+
+        return HttpResponse.json({ error: 'Card not found' }, { status: 404 });
+    }),
+
+    // Move card
+    http.post('/api/cards/move', async({ request }) => {
+        await delay(CONFIG.NETWORK_DELAY);
+
+        if (shouldFail()) {
+            return HttpResponse.json({ error: 'Failed to move card' }, { status: 500 });
+        }
+
+        const body = await request.json();
+        const { sourceListId, destinationListId, cardId, destinationIndex } = body;
+
+        // Find and remove card from source
+        const sourceCards = mockBoard.cards[sourceListId];
+        const cardIndex = sourceCards ? .findIndex((c) => c.id === cardId);
+
+        if (cardIndex !== -1) {
+            const [card] = sourceCards.splice(cardIndex, 1);
+
+            // Add to destination
+            if (!mockBoard.cards[destinationListId]) {
+                mockBoard.cards[destinationListId] = [];
+            }
+            mockBoard.cards[destinationListId].splice(destinationIndex, 0, card);
+
+            return HttpResponse.json({ success: true });
+        }
+
+        return HttpResponse.json({ error: 'Card not found' }, { status: 404 });
+    }),
 ];
 
 // Export for testing configuration
 export const setMockConfig = (config) => {
-  Object.assign(CONFIG, config);
+    Object.assign(CONFIG, config);
 };

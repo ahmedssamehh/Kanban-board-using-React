@@ -67,8 +67,7 @@ export function boardReducer(state, action) {
                 return {
                     ...state,
                     lists: state.lists.map((list) =>
-                        list.id === action.payload.listId ?
-                        {...list, title: action.payload.title } :
+                        list.id === action.payload.listId ? {...list, title: action.payload.title } :
                         list
                     ),
                     lastModified: Date.now(),
@@ -91,8 +90,7 @@ export function boardReducer(state, action) {
                 return {
                     ...state,
                     lists: state.lists.map((list) =>
-                        list.id === action.payload.listId ?
-                        {...list, archived: false } :
+                        list.id === action.payload.listId ? {...list, archived: false } :
                         list
                     ),
                     lastModified: Date.now(),
@@ -104,7 +102,8 @@ export function boardReducer(state, action) {
                 const { listId } = action.payload;
                 // eslint-disable-next-line no-unused-vars
                 const {
-                    [listId]: _removed, ...remainingCards } = state.cards;
+                    [listId]: _removed, ...remainingCards
+                } = state.cards;
                 return {
                     ...state,
                     lists: state.lists.filter((list) => list.id !== listId),
@@ -140,8 +139,7 @@ export function boardReducer(state, action) {
                     cards: {
                         ...state.cards,
                         [listId]: state.cards[listId].map((card) =>
-                            card.id === cardId ?
-                            {...card, ...updates, updatedAt: Date.now() } :
+                            card.id === cardId ? {...card, ...updates, updatedAt: Date.now() } :
                             card
                         ),
                     },
