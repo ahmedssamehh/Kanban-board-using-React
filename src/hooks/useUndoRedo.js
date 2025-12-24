@@ -58,7 +58,7 @@ export function useUndoRedo(initialState, maxHistorySize = 50) {
     const [currentState, setCurrentState] = useState(initialState);
 
     useEffect(() => {
-        const newState = history[currentIndex] ? .state || initialState;
+        const newState = history[currentIndex]?.state || initialState;
         setCurrentState(newState);
     }, [currentIndex, history, initialState]);
 
@@ -123,7 +123,7 @@ export function useUndoRedo(initialState, maxHistorySize = 50) {
             isNavigatingRef.current = false;
         }, 0);
 
-        return history[currentIndex - 1] ? .state || currentState;
+        return history[currentIndex - 1]?.state || currentState;
     }, [canUndo, currentIndex, currentState, history]);
 
     /**
@@ -142,7 +142,7 @@ export function useUndoRedo(initialState, maxHistorySize = 50) {
             isNavigatingRef.current = false;
         }, 0);
 
-        return history[currentIndex + 1] ? .state || currentState;
+        return history[currentIndex + 1]?.state || currentState;
     }, [canRedo, currentIndex, currentState, history]);
 
     /**
@@ -174,7 +174,7 @@ export function useUndoRedo(initialState, maxHistorySize = 50) {
             isNavigatingRef.current = false;
         }, 0);
 
-        return history[index] ? .state || currentState;
+        return history[index]?.state || currentState;
     }, [history, currentState]);
 
     /**

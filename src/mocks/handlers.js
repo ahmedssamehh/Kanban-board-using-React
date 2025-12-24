@@ -216,7 +216,7 @@ export const handlers = [
 
         // Find and remove card from source
         const sourceCards = mockBoard.cards[sourceListId];
-        const cardIndex = sourceCards ? .findIndex((c) => c.id === cardId);
+        const cardIndex = sourceCards?.findIndex((c) => c.id === cardId);
 
         if (cardIndex !== -1) {
             const [card] = sourceCards.splice(cardIndex, 1);

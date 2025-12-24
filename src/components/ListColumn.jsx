@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, memo, useEffect, useRef } from 'react';
-import { FixedSizeList } from 'react-window';
+// import { FixedSizeList } from 'react-window';
 import { useBoardState } from '../hooks/useBoardState';
 import Card from './Card';
 import { validateListTitle, validateCardTitle } from '../utils/validators';
@@ -8,6 +8,7 @@ import { generateId } from '../utils/helpers';
 
 // Threshold for virtualization - lists with >30 cards will use react-window
 const VIRTUALIZATION_THRESHOLD = 30;
+const USE_VIRTUALIZATION = false; // Temporarily disabled
 
 function ListColumn({ list }) {
   const { state, dispatchWithOptimistic, ACTIONS } = useBoardState();
@@ -38,7 +39,7 @@ function ListColumn({ list }) {
   const cards = useMemo(() => state.cards[list.id] || [], [state.cards, list.id]);
   
   // Determine if we should use virtualization
-  const shouldVirtualize = cards.length > VIRTUALIZATION_THRESHOLD;
+  const shouldVirtualize = USE_VIRTUALIZATION && cards.length > VIRTUALIZATION_THRESHOLD;
 
   // Row renderer for virtualized list
   const Row = useCallback(
