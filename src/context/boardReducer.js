@@ -200,12 +200,27 @@ export function boardReducer(state, action) {
                 const card = state.cards[sourceListId].find((c) => c.id === cardId);
                 if (!card) return state;
 
-                // Remove from source
+                // Handle same list movement differently to avoid issues
+                if (sourceListId === destinationListId) {
+                    const cards = [...state.cards[sourceListId]];
+                    const sourceIndex = cards.findIndex((c) => c.id === cardId);
+                    const [removed] = cards.splice(sourceIndex, 1);
+                    cards.splice(destinationIndex, 0, removed);
+
+                    return {
+                        ...state,
+                        cards: {
+                            ...state.cards,
+                            [sourceListId]: cards,
+                        },
+                        lastModified: Date.now(),
+                    };
+                }
+
+                // Different lists: remove from source, add to destination
                 const sourceCards = state.cards[sourceListId].filter(
                     (c) => c.id !== cardId
                 );
-
-                // Add to destination
                 const destCards = [...(state.cards[destinationListId] || [])];
                 destCards.splice(destinationIndex, 0, card);
 

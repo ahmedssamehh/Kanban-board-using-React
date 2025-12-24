@@ -10,7 +10,7 @@ export default {
         '^.+\\.(js|jsx)$': 'babel-jest',
     },
     transformIgnorePatterns: [
-        'node_modules/(?!(uuid)/)',
+        'node_modules/(?!(uuid|uuid/dist))',
     ],
     collectCoverageFrom: [
         'src/**/*.{js,jsx}',
