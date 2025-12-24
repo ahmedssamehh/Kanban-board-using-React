@@ -160,6 +160,7 @@ export function boardReducer(state, action) {
         case ACTIONS.UPDATE_CARD:
             {
                 const { listId, cardId, updates } = action.payload;
+                if (!state.cards[listId]) return state;
                 return {
                     ...state,
                     cards: {
@@ -181,6 +182,7 @@ export function boardReducer(state, action) {
         case ACTIONS.DELETE_CARD:
             {
                 const { listId, cardId } = action.payload;
+                if (!state.cards[listId]) return state;
                 return {
                     ...state,
                     cards: {
@@ -195,6 +197,9 @@ export function boardReducer(state, action) {
             {
                 const { sourceListId, destinationListId, cardId, destinationIndex } =
                 action.payload;
+
+                // Check if source list has cards
+                if (!state.cards[sourceListId]) return state;
 
                 // Find the card
                 const card = state.cards[sourceListId].find((c) => c.id === cardId);

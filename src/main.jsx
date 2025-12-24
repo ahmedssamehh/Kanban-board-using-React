@@ -12,9 +12,14 @@ async function enableMocking() {
   try {
     const { worker } = await import('./mocks/browser');
 
-    return worker.start({
+    await worker.start({
       onUnhandledRequest: 'bypass',
+      serviceWorker: {
+        url: '/mockServiceWorker.js'
+      }
     });
+    
+    console.log('[MSW] Mocking enabled - API calls will be intercepted');
   } catch (error) {
     console.error('Failed to start MSW:', error);
     // Don't block app loading if MSW fails

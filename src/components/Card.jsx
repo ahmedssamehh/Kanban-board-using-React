@@ -27,8 +27,8 @@ function Card({ card, listId }) {
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
         onClick={() => setShowModal(true)}
-        className={`card bg-white rounded-md p-3 shadow-sm hover:shadow-md cursor-pointer transition-all ${
-          isDragging ? 'opacity-50' : ''
+        className={`card bg-white rounded-lg p-4 shadow-md hover:shadow-xl cursor-pointer transition-all duration-200 border border-gray-100 hover:border-blue-200 ${
+          isDragging ? 'opacity-50 rotate-2 scale-95' : 'hover:-translate-y-0.5'
         }`}
         role="button"
         tabIndex={0}
@@ -40,18 +40,18 @@ function Card({ card, listId }) {
         }}
         aria-label={`Card: ${card.title}`}
       >
-        <h3 className="font-medium text-gray-800 mb-2">{card.title}</h3>
+        <h3 className="font-semibold text-gray-900 mb-2 text-base">{card.title}</h3>
         {card.description && (
-          <p className="text-sm text-gray-600 line-clamp-2 mb-2">
+          <p className="text-sm text-gray-600 line-clamp-2 mb-3 leading-relaxed">
             {card.description}
           </p>
         )}
         {card.tags && card.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-1.5 mt-auto">
             {card.tags.map((tag) => (
               <span
                 key={`${card.id}-${tag}`}
-                className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full"
+                className="px-3 py-1 bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 text-xs font-medium rounded-full border border-blue-200"
               >
                 {tag}
               </span>

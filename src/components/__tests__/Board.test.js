@@ -21,7 +21,7 @@ describe('Board Component', () => {
             /BoardProvider>
         );
 
-        expect(screen.getByText('+ Add List')).toBeInTheDocument();
+        expect(screen.getByText(/Add List/i)).toBeInTheDocument();
     });
 
     test('can add a new list', async() => {
@@ -34,7 +34,7 @@ describe('Board Component', () => {
         );
 
         // Click add list button
-        const addButton = screen.getByText('+ Add List');
+        const addButton = screen.getByText(/Add List/i);
         fireEvent.click(addButton);
 
         // Input appears
@@ -94,7 +94,7 @@ describe('Board Component', () => {
         );
 
         // Click add list
-        fireEvent.click(screen.getByText('+ Add List'));
+        fireEvent.click(screen.getByText(/Add List/i));
 
         // Submit empty title
         const input = screen.getByPlaceholderText('Enter list title...');

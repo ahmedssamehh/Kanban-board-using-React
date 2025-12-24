@@ -1,13 +1,13 @@
-import { useState, useCallback, useMemo, memo } from 'react';
-// import { FixedSizeList } from 'react-window';
+import { useState, useCallback, useMemo, memo, useEffect, useRef } from 'react';
+import { FixedSizeList } from 'react-window';
 import { useBoardState } from '../hooks/useBoardState';
 import Card from './Card';
 import { validateListTitle, validateCardTitle } from '../utils/validators';
 import { api } from '../services/api';
 import { generateId } from '../utils/helpers';
 
-// Threshold for virtualization (temporarily disabled)
-const VIRTUALIZATION_THRESHOLD = 999999; // Disabled
+// Threshold for virtualization - lists with >30 cards will use react-window
+const VIRTUALIZATION_THRESHOLD = 30;
 
 function ListColumn({ list }) {
   const { state, dispatchWithOptimistic, ACTIONS } = useBoardState();
@@ -17,6 +17,22 @@ function ListColumn({ list }) {
   const [newCardTitle, setNewCardTitle] = useState('');
   const [showMenu, setShowMenu] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [dropIndex, setDropIndex] = useState(null);
+  const menuRef = useRef(null);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenu(false);
+      }
+    };
+
+    if (showMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showMenu]);
 
   // Memoize cards array to prevent recreating on every render
   const cards = useMemo(() => state.cards[list.id] || [], [state.cards, list.id]);
@@ -71,6 +87,19 @@ function ListColumn({ list }) {
           payload: { listId: list.id },
         },
         () => api.updateList(list.id, { archived: true })
+      );
+    }
+    setShowMenu(false);
+  }, [list.title, list.id, dispatchWithOptimistic, ACTIONS]);
+
+  const handleDeleteList = useCallback(() => {
+    if (window.confirm(`Delete "${list.title}" and all its cards? This cannot be undone.`)) {
+      dispatchWithOptimistic(
+        {
+          type: ACTIONS.DELETE_LIST,
+          payload: { listId: list.id },
+        },
+        () => api.deleteList(list.id)
       );
     }
     setShowMenu(false);
@@ -141,13 +170,31 @@ function ListColumn({ list }) {
   const handleDrop = (e) => {
     e.preventDefault();
     setIsDragOver(false);
+    
+    const finalDropIndex = dropIndex !== null ? dropIndex : cards.length;
+    setDropIndex(null);
 
     try {
       const data = JSON.parse(e.dataTransfer.getData('application/json'));
       const { cardId, sourceListId } = data;
 
+      // Calculate the actual destination index
+      let destinationIndex = finalDropIndex;
+      
+      // If moving within the same list, adjust index if moving down
       if (sourceListId === list.id) {
-        return; // Same list, no action needed
+        const sourceIndex = cards.findIndex(c => c.id === cardId);
+        if (sourceIndex === -1) return;
+        
+        // If dropping after the source position, adjust for removal
+        if (destinationIndex > sourceIndex) {
+          destinationIndex -= 1;
+        }
+        
+        // Don't move if dropping in same position
+        if (sourceIndex === destinationIndex) {
+          return;
+        }
       }
 
       dispatchWithOptimistic(
@@ -157,10 +204,10 @@ function ListColumn({ list }) {
             sourceListId,
             destinationListId: list.id,
             cardId,
-            destinationIndex: cards.length,
+            destinationIndex,
           },
         },
-        () => api.moveCard(sourceListId, list.id, cardId, cards.length)
+        () => api.moveCard(sourceListId, list.id, cardId, destinationIndex)
       );
     } catch (error) {
       // Error handling for drop
@@ -169,8 +216,8 @@ function ListColumn({ list }) {
 
   return (
     <div
-      className={`list-column flex-shrink-0 w-72 bg-gray-100 rounded-lg p-3 flex flex-col max-h-full ${
-        isDragOver ? 'ring-2 ring-blue-400' : ''
+      className={`list-column flex-shrink-0 w-72 bg-gradient-to-b from-gray-50 to-gray-100 rounded-xl p-4 flex flex-col max-h-full shadow-sm border border-gray-200 transition-all duration-200 ${
+        isDragOver ? 'ring-2 ring-blue-400 shadow-lg scale-[1.02]' : ''
       }`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -187,30 +234,46 @@ function ListColumn({ list }) {
             onKeyDown={handleListKeyDown}
             className="flex-1 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             aria-label="Edit list title"
+            autoFocus
           />
         ) : (
           <>
             <button
               onClick={() => setIsEditingTitle(true)}
-              className="flex-1 font-semibold text-gray-800 text-left hover:bg-gray-200 px-2 py-1 rounded"
+              className="flex-1 font-bold text-gray-900 text-left hover:bg-white/50 px-3 py-2 rounded-lg transition-colors text-lg"
             >
               {list.title}
             </button>
-            <div className="relative">
+            <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setShowMenu(!showMenu)}
-                className="p-1 hover:bg-gray-200 rounded"
+                className="p-2 hover:bg-white/50 rounded-lg transition-colors text-gray-600 hover:text-gray-900"
                 aria-label="List options"
               >
                 ⋮
               </button>
               {showMenu && (
-                <div className="absolute right-0 mt-1 w-48 bg-white rounded-md shadow-lg z-10">
+                <div 
+                  className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 z-50 overflow-hidden"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <button
-                    onClick={handleArchiveList}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleArchiveList();
+                    }}
+                    className="block w-full text-left px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
                   >
-                    Archive List
+                    📦 Archive List
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteList();
+                    }}
+                    className="block w-full text-left px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors border-t border-gray-100"
+                  >
+                    🗑️ Delete List
                   </button>
                 </div>
               )}
@@ -220,10 +283,62 @@ function ListColumn({ list }) {
       </div>
 
       {/* Cards */}
-      <div className="flex-1 overflow-y-auto space-y-2 mb-3">
-        {cards.map((card) => (
-          <Card key={card.id} card={card} listId={list.id} />
-        ))}
+      <div className="flex-1 overflow-y-auto mb-3">
+        {shouldVirtualize ? (
+          <FixedSizeList
+            height={600}
+            itemCount={cards.length}
+            itemSize={130}
+            width="100%"
+          >
+            {Row}
+          </FixedSizeList>
+        ) : (
+          <>
+            {cards.map((card, index) => (
+              <div key={card.id}>
+                <div
+                  className={`h-2 transition-colors ${
+                    dropIndex === index ? 'bg-blue-400' : 'transparent'
+                  }`}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setDropIndex(index);
+                    setIsDragOver(true);
+                  }}
+                  onDragLeave={(e) => {
+                    e.stopPropagation();
+                  }}
+                  onDrop={(e) => {
+                    e.stopPropagation();
+                    handleDrop(e);
+                  }}
+                />
+                <Card card={card} listId={list.id} />
+              </div>
+            ))}
+            {/* Drop zone at the end */}
+            <div
+              className={`h-2 transition-colors ${
+                dropIndex === cards.length ? 'bg-blue-400' : 'transparent'
+              }`}
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setDropIndex(cards.length);
+                setIsDragOver(true);
+              }}
+              onDragLeave={(e) => {
+                e.stopPropagation();
+              }}
+              onDrop={(e) => {
+                e.stopPropagation();
+                handleDrop(e);
+              }}
+            />
+          </>
+        )}
       </div>
 
       {/* Add Card */}

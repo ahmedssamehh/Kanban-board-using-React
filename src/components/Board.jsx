@@ -64,7 +64,7 @@ function Board() {
         {/* Add new list */}
         <div className="flex-shrink-0 w-72">
           {isAddingList ? (
-            <div className="bg-gray-100 rounded-lg p-3">
+            <div className="bg-gradient-to-b from-gray-50 to-gray-100 rounded-xl p-4 border border-gray-200 shadow-sm">
               <input
                 type="text"
                 value={newListTitle}
@@ -72,17 +72,18 @@ function Board() {
                 onKeyDown={handleKeyDown}
                 onBlur={handleAddList}
                 placeholder="Enter list title..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                autoFocus
+                className="w-full px-4 py-3 border-2 border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 aria-label="New list title"
               />
             </div>
           ) : (
             <button
               onClick={() => setIsAddingList(true)}
-              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors"
+              className="w-full bg-white hover:bg-gray-50 text-gray-700 font-semibold py-3 px-4 rounded-xl transition-all border-2 border-dashed border-gray-300 hover:border-blue-400 hover:text-blue-600 shadow-sm hover:shadow-md"
               aria-label="Add new list"
             >
-              + Add List
+              ✨ Add List
             </button>
           )}
         </div>

@@ -88,16 +88,18 @@ function CardDetailModal({ card, listId, onClose }) {
   };
 
   return (
-    <button
+    <div
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
       onClick={onClose}
-      aria-label="Close dialog"
-      type="button"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
     >
       <div
         ref={modalRef}
         className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4"
         role="document"
+        onClick={(e) => e.stopPropagation()}
       >
         <div className="p-6">
           {/* Header */}
@@ -107,6 +109,7 @@ function CardDetailModal({ card, listId, onClose }) {
             </h2>
             <button
               onClick={onClose}
+              type="button"
               className="text-gray-500 hover:text-gray-700 text-2xl"
               aria-label="Close modal"
             >
@@ -168,6 +171,7 @@ function CardDetailModal({ card, listId, onClose }) {
               />
               <button
                 onClick={handleAddTag}
+                type="button"
                 className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
               >
                 Add
@@ -182,6 +186,7 @@ function CardDetailModal({ card, listId, onClose }) {
                   {tag}
                   <button
                     onClick={() => handleRemoveTag(tags.indexOf(tag))}
+                    type="button"
                     className="text-blue-700 hover:text-blue-900 font-bold"
                     aria-label={`Remove tag ${tag}`}
                   >
@@ -196,6 +201,7 @@ function CardDetailModal({ card, listId, onClose }) {
           <div className="flex justify-between">
             <button
               onClick={handleDelete}
+              type="button"
               className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
             >
               Delete Card
@@ -203,12 +209,14 @@ function CardDetailModal({ card, listId, onClose }) {
             <div className="flex gap-2">
               <button
                 onClick={onClose}
+                type="button"
                 className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSave}
+                type="button"
                 className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
               >
                 Save
@@ -217,7 +225,7 @@ function CardDetailModal({ card, listId, onClose }) {
           </div>
         </div>
       </div>
-    </button>
+    </div>
   );
 }
 
