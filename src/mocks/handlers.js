@@ -76,11 +76,14 @@ export const handlers = [
 
         const { listId } = params;
         const body = await request.json();
-        const index = mockBoard.lists.findIndex((l) => l.id === listId);
+
+        // Find list by ID (handle both string and direct comparison)
+        const index = mockBoard.lists.findIndex((l) => String(l.id) === String(listId));
 
         if (index !== -1) {
             const existingList = mockBoard.lists[index];
-            const clientVersion = body.updates.version;
+            const updates = body.updates || body;
+            const clientVersion = updates.version;
 
             // Check for version conflict
             if (clientVersion && existingList.version && clientVersion < existingList.version) {
@@ -93,7 +96,7 @@ export const handlers = [
 
             mockBoard.lists[index] = {
                 ...existingList,
-                ...body.updates,
+                ...updates,
                 lastModifiedAt: Date.now(),
                 version: (existingList.version || 1) + 1,
             };
@@ -213,7 +216,7 @@ export const handlers = [
 
         // Find and remove card from source
         const sourceCards = mockBoard.cards[sourceListId];
-        const cardIndex = sourceCards?.findIndex((c) => c.id === cardId);
+        const cardIndex = sourceCards ? .findIndex((c) => c.id === cardId);
 
         if (cardIndex !== -1) {
             const [card] = sourceCards.splice(cardIndex, 1);

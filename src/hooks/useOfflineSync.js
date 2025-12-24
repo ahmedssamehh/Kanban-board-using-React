@@ -40,7 +40,7 @@ export function useOfflineSync(boardState, onConflict) {
     const [queueLength, setQueueLength] = useState(0);
     const [lastSyncTime, setLastSyncTime] = useState(null);
     const [syncError, setSyncError] = useState(null);
-    
+
     const retryCountRef = useRef(0);
     const maxRetries = 3;
     const baseDelay = 1000; // 1 second
@@ -62,9 +62,9 @@ export function useOfflineSync(boardState, onConflict) {
     /**
      * Process sync queue with retry logic
      */
-    const processSyncQueue = useCallback(async () => {
+    const processSyncQueue = useCallback(async() => {
         const queue = getSyncQueue();
-        
+
         for (const item of queue) {
             try {
                 if (item.apiCall) {
@@ -86,14 +86,14 @@ export function useOfflineSync(boardState, onConflict) {
                 }
             }
         }
-        
+
         updateQueueLength();
     }, [updateQueueLength, getRetryDelay]);
 
     /**
      * Sync board state with server
      */
-    const syncWithServer = useCallback(async () => {
+    const syncWithServer = useCallback(async() => {
         if (!isOnline) {
             return;
         }
@@ -107,7 +107,7 @@ export function useOfflineSync(boardState, onConflict) {
 
             // Check for conflicts (simplified - full logic in BoardProvider)
             const hasConflicts = serverState.lastModified > boardState.lastModified;
-            
+
             if (hasConflicts && onConflict) {
                 onConflict(serverState);
             }
@@ -122,7 +122,7 @@ export function useOfflineSync(boardState, onConflict) {
             retryCountRef.current = 0;
         } catch (error) {
             setSyncError(error.message);
-            
+
             // Retry with exponential backoff
             if (retryCountRef.current < maxRetries) {
                 retryCountRef.current++;
@@ -145,7 +145,7 @@ export function useOfflineSync(boardState, onConflict) {
     /**
      * Manually trigger sync
      */
-    const syncNow = useCallback(async () => {
+    const syncNow = useCallback(async() => {
         if (!isSyncing) {
             await syncWithServer();
         }

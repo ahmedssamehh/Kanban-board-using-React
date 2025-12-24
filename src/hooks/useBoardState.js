@@ -45,9 +45,7 @@ export function useBoardState() {
          * @param {string} title - List title
          */
         addList: useCallback((title) => {
-            dispatchWithOptimistic(
-                { type: ACTIONS.ADD_LIST, payload: { title } }
-            );
+            dispatchWithOptimistic({ type: ACTIONS.ADD_LIST, payload: { title } });
         }, [dispatchWithOptimistic, ACTIONS]),
 
         /**
@@ -56,9 +54,7 @@ export function useBoardState() {
          * @param {string} title - New title
          */
         renameList: useCallback((listId, title) => {
-            dispatchWithOptimistic(
-                { type: ACTIONS.RENAME_LIST, payload: { listId, title } }
-            );
+            dispatchWithOptimistic({ type: ACTIONS.RENAME_LIST, payload: { listId, title } });
         }, [dispatchWithOptimistic, ACTIONS]),
 
         /**
@@ -66,9 +62,7 @@ export function useBoardState() {
          * @param {string} listId - List ID
          */
         archiveList: useCallback((listId) => {
-            dispatchWithOptimistic(
-                { type: ACTIONS.ARCHIVE_LIST, payload: { listId } }
-            );
+            dispatchWithOptimistic({ type: ACTIONS.ARCHIVE_LIST, payload: { listId } });
         }, [dispatchWithOptimistic, ACTIONS]),
 
         /**
@@ -76,9 +70,7 @@ export function useBoardState() {
          * @param {string} listId - List ID
          */
         restoreList: useCallback((listId) => {
-            dispatchWithOptimistic(
-                { type: ACTIONS.RESTORE_LIST, payload: { listId } }
-            );
+            dispatchWithOptimistic({ type: ACTIONS.RESTORE_LIST, payload: { listId } });
         }, [dispatchWithOptimistic, ACTIONS]),
 
         /**
@@ -86,9 +78,7 @@ export function useBoardState() {
          * @param {string} listId - List ID
          */
         deleteList: useCallback((listId) => {
-            dispatchWithOptimistic(
-                { type: ACTIONS.DELETE_LIST, payload: { listId } }
-            );
+            dispatchWithOptimistic({ type: ACTIONS.DELETE_LIST, payload: { listId } });
         }, [dispatchWithOptimistic, ACTIONS]),
 
         /**
@@ -97,9 +87,7 @@ export function useBoardState() {
          * @param {Object} card - Card data (title, description, tags)
          */
         addCard: useCallback((listId, card) => {
-            dispatchWithOptimistic(
-                { type: ACTIONS.ADD_CARD, payload: { listId, card } }
-            );
+            dispatchWithOptimistic({ type: ACTIONS.ADD_CARD, payload: { listId, card } });
         }, [dispatchWithOptimistic, ACTIONS]),
 
         /**
@@ -109,9 +97,7 @@ export function useBoardState() {
          * @param {Object} updates - Fields to update
          */
         updateCard: useCallback((listId, cardId, updates) => {
-            dispatchWithOptimistic(
-                { type: ACTIONS.UPDATE_CARD, payload: { listId, cardId, updates } }
-            );
+            dispatchWithOptimistic({ type: ACTIONS.UPDATE_CARD, payload: { listId, cardId, updates } });
         }, [dispatchWithOptimistic, ACTIONS]),
 
         /**
@@ -120,9 +106,7 @@ export function useBoardState() {
          * @param {string} cardId - Card ID
          */
         deleteCard: useCallback((listId, cardId) => {
-            dispatchWithOptimistic(
-                { type: ACTIONS.DELETE_CARD, payload: { listId, cardId } }
-            );
+            dispatchWithOptimistic({ type: ACTIONS.DELETE_CARD, payload: { listId, cardId } });
         }, [dispatchWithOptimistic, ACTIONS]),
 
         /**
@@ -133,12 +117,10 @@ export function useBoardState() {
          * @param {number} destinationIndex - Target index in destination
          */
         moveCard: useCallback((sourceListId, destinationListId, cardId, destinationIndex) => {
-            dispatchWithOptimistic(
-                { 
-                    type: ACTIONS.MOVE_CARD, 
-                    payload: { sourceListId, destinationListId, cardId, destinationIndex } 
-                }
-            );
+            dispatchWithOptimistic({
+                type: ACTIONS.MOVE_CARD,
+                payload: { sourceListId, destinationListId, cardId, destinationIndex }
+            });
         }, [dispatchWithOptimistic, ACTIONS]),
 
         /**

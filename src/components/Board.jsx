@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useBoardState } from '../hooks/useBoardState';
 import ListColumn from './ListColumn';
 import { validateListTitle } from '../utils/validators';
@@ -10,9 +10,13 @@ function Board() {
   const [newListTitle, setNewListTitle] = useState('');
   const [isAddingList, setIsAddingList] = useState(false);
 
-  const activeLists = state.lists.filter((list) => !list.archived);
+  // Memoize filtered lists to avoid recalculation on every render
+  const activeLists = useMemo(
+    () => state.lists.filter((list) => !list.archived),
+    [state.lists]
+  );
 
-  const handleAddList = () => {
+  const handleAddList = useCallback(() => {
     if (!newListTitle.trim()) return;
 
     const validation = validateListTitle(newListTitle);
@@ -39,16 +43,16 @@ function Board() {
 
     setNewListTitle('');
     setIsAddingList(false);
-  };
+  }, [newListTitle, state.lists.length, dispatchWithOptimistic, ACTIONS]);
 
-  const handleKeyDown = (e) => {
+  const handleKeyDown = useCallback((e) => {
     if (e.key === 'Enter') {
       handleAddList();
     } else if (e.key === 'Escape') {
       setIsAddingList(false);
       setNewListTitle('');
     }
-  };
+  }, [handleAddList]);
 
   return (
     <div className="board h-full overflow-x-auto overflow-y-hidden">

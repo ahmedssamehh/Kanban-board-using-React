@@ -14,7 +14,7 @@ describe('useBoardState', () => {
     test('should throw error when used outside BoardProvider', () => {
         // Suppress console.error for this test
         const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-        
+
         expect(() => {
             renderHook(() => useBoardState());
         }).toThrow('useBoardState must be used within a BoardProvider');
@@ -24,7 +24,7 @@ describe('useBoardState', () => {
 
     test('should provide state and actions', () => {
         const { result } = renderHook(() => useBoardState(), { wrapper });
-        
+
         expect(result.current.state).toBeDefined();
         expect(result.current.dispatch).toBeDefined();
         expect(result.current.actions).toBeDefined();
@@ -33,7 +33,7 @@ describe('useBoardState', () => {
 
     test('should have all action creator methods', () => {
         const { result } = renderHook(() => useBoardState(), { wrapper });
-        
+
         const expectedActions = [
             'addList',
             'renameList',
@@ -56,7 +56,7 @@ describe('useBoardState', () => {
 
     test('should expose ACTIONS constants', () => {
         const { result } = renderHook(() => useBoardState(), { wrapper });
-        
+
         expect(result.current.ACTIONS).toBeDefined();
         expect(result.current.ACTIONS.ADD_LIST).toBe('ADD_LIST');
         expect(result.current.ACTIONS.ADD_CARD).toBe('ADD_CARD');

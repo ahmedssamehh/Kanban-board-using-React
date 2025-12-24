@@ -1,12 +1,16 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo, memo } from 'react';
+// import { FixedSizeList } from 'react-window';
 import { useBoardState } from '../hooks/useBoardState';
 import Card from './Card';
 import { validateListTitle, validateCardTitle } from '../utils/validators';
 import { api } from '../services/api';
 import { generateId } from '../utils/helpers';
 
+// Threshold for virtualization (temporarily disabled)
+const VIRTUALIZATION_THRESHOLD = 999999; // Disabled
+
 function ListColumn({ list }) {
-  const { state, dispatch, dispatchWithOptimistic, ACTIONS } = useBoardState();
+  const { state, dispatchWithOptimistic, ACTIONS } = useBoardState();
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [listTitle, setListTitle] = useState(list.title);
   const [isAddingCard, setIsAddingCard] = useState(false);
@@ -14,7 +18,26 @@ function ListColumn({ list }) {
   const [showMenu, setShowMenu] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
 
-  const cards = state.cards[list.id] || [];
+  // Memoize cards array to prevent recreating on every render
+  const cards = useMemo(() => state.cards[list.id] || [], [state.cards, list.id]);
+  
+  // Determine if we should use virtualization
+  const shouldVirtualize = cards.length > VIRTUALIZATION_THRESHOLD;
+
+  // Row renderer for virtualized list
+  const Row = useCallback(
+    ({ index, style }) => {
+      const card = cards[index];
+      return (
+        <div style={style}>
+          <div className="px-1">
+            <Card key={card.id} card={card} listId={list.id} />
+          </div>
+        </div>
+      );
+    },
+    [cards, list.id]
+  );
 
   const handleRenameList = useCallback(() => {
     if (listTitle.trim() === list.title) {
@@ -246,4 +269,12 @@ function ListColumn({ list }) {
   );
 }
 
-export default ListColumn;
+// Memoize ListColumn to prevent unnecessary re-renders
+export default memo(ListColumn, (prevProps, nextProps) => {
+  // Custom comparison: only re-render if the list object has changed
+  return (
+    prevProps.list.id === nextProps.list.id &&
+    prevProps.list.title === nextProps.list.title &&
+    prevProps.list.archived === nextProps.list.archived
+  );
+});

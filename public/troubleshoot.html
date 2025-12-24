@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clear LocalStorage</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 100px auto;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        button {
+            background: #f44336;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        
+        button:hover {
+            background: #da190b;
+        }
+        
+        .success {
+            background: #4CAF50;
+        }
+        
+        .success:hover {
+            background: #45a049;
+        }
+        
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .show {
+            display: block !important;
+        }
+        
+        .error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .success-msg {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🔧 Kanban Board Troubleshooting</h1>
+    <p>If you're seeing a white screen, try clearing the localStorage data:</p>
+
+    <button onclick="clearData()">Clear All localStorage</button>
+    <button class="success" onclick="checkData()">Check Current Data</button>
+
+    <div id="result"></div>
+
+    <script>
+        function clearData() {
+            try {
+                localStorage.clear();
+                showResult('✅ All localStorage cleared! Refresh your app.', 'success-msg');
+            } catch (error) {
+                showResult('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        function checkData() {
+            try {
+                const data = localStorage.getItem('kanban-board');
+                if (!data) {
+                    showResult('ℹ️ No data found in localStorage', 'success-msg');
+                } else {
+                    const size = (data.length / 1024).toFixed(2);
+                    const parsed = JSON.parse(data);
+                    const listCount = parsed.lists ? parsed.lists.length : 0;
+                    const cardCount = parsed.cards ? Object.values(parsed.cards).flat().length : 0;
+
+                    showResult(`📊 Found data:<br>
+                        - Lists: ${listCount}<br>
+                        - Cards: ${cardCount}<br>
+                        - Size: ${size} KB`, 'success-msg');
+                }
+            } catch (error) {
+                showResult('❌ Error reading data: ' + error.message + '<br>The data might be corrupted. Try clearing it.', 'error');
+            }
+        }
+
+        function showResult(message, className) {
+            const result = document.getElementById('result');
+            result.innerHTML = message;
+            result.className = className + ' show';
+        }
+
+        // Auto-check on load
+        window.onload = checkData;
+    </script>
+</body>
+
+</html>

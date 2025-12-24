@@ -18,7 +18,7 @@ describe('useUndoRedo', () => {
         expect(result.current.currentIndex).toBe(0);
     });
 
-    test('should push new state to history', async () => {
+    test('should push new state to history', async() => {
         const { result } = renderHook(() => useUndoRedo(initialState));
 
         const newState = {
@@ -76,8 +76,8 @@ describe('useUndoRedo', () => {
         const { result } = renderHook(() => useUndoRedo(initialState));
 
         act(() => {
-            result.current.pushState({ ...initialState, version: 2 });
-            result.current.pushState({ ...initialState, version: 3 });
+            result.current.pushState({...initialState, version: 2 });
+            result.current.pushState({...initialState, version: 3 });
         });
 
         act(() => {

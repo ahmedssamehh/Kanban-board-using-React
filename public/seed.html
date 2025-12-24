@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kanban Board - Data Seeding Tool</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        p {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .input-group {
+            margin: 30px 0;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        
+        button:hover {
+            background: #45a049;
+        }
+        
+        button.secondary {
+            background: #2196F3;
+        }
+        
+        button.secondary:hover {
+            background: #0b7dda;
+        }
+        
+        button.danger {
+            background: #f44336;
+        }
+        
+        button.danger:hover {
+            background: #da190b;
+        }
+        
+        #output {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-left: 4px solid #4CAF50;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        #output.error {
+            border-left-color: #f44336;
+            background: #ffebee;
+        }
+        
+        .button-group {
+            margin: 20px 0;
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+            border-left: 4px solid #2196F3;
+        }
+        
+        .info-box strong {
+            color: #1976D2;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🌱 Kanban Board Data Seeding Tool</h1>
+        <p>This tool generates dummy cards for performance testing. The generated data will be saved to localStorage and can be viewed in your Kanban Board application.</p>
+
+        <div class="info-box">
+            <strong>📊 Current Data:</strong>
+            <div id="currentData">Loading...</div>
+        </div>
+
+        <div class="input-group">
+            <label for="numCards">Number of Cards to Generate:</label>
+            <input type="number" id="numCards" value="500" min="1" max="10000" />
+        </div>
+
+        <div class="button-group">
+            <button onclick="generateData()">🚀 Generate Data</button>
+            <button class="secondary" onclick="viewData()">👀 View Current Data</button>
+            <button class="danger" onclick="clearData()">🗑️ Clear All Data</button>
+        </div>
+
+        <div id="output"></div>
+    </div>
+
+    <script type="module">
+        // Inline seeding functions const priorities = ['low', 'medium', 'high']; const tags = ['bug', 'feature', 'enhancement', 'documentation', 'testing', 'design', 'performance', 'security', 'refactor', 'urgent']; const titles = [ 'Fix login issue', 'Add user
+        profile', 'Implement search', 'Update docs', 'Optimize queries', 'Design landing page', 'Fix memory leak', 'Add tests', 'Refactor code', 'Implement cache', 'Add dark mode', 'Fix layout bugs', 'Integrate payment', 'Add notifications', 'Upload feature',
+        'Optimize images' ]; const descriptions = [ 'Critical issue needing immediate attention.', 'Feature to improve user experience.', 'Refactoring for better maintainability.', 'Documentation update required.', 'Performance optimization needed.',
+        'Design improvement for better UX.', 'Technical debt to address.', 'Security patch required.', 'Testing coverage improvement.', 'Enhancement adding significant value.' ]; function generateUUID() { return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,
+        function(c) { const r = Math.random() * 16 | 0; const v = c === 'x' ? r : (r & 0x3 | 0x8); return v.toString(16); }); } function generateCard(listId) { const title = titles[Math.floor(Math.random() * titles.length)]; const description = descriptions[Math.floor(Math.random()
+        * descriptions.length)]; const priority = priorities[Math.floor(Math.random() * priorities.length)]; const numTags = Math.floor(Math.random() * 3) + 2; const cardTags = []; for (let i = 0; i
+        < numTags; i++) { const tag=t ags[Math.floor(Math.random()
+            * tags.length)]; if (!cardTags.includes(tag)) cardTags.push(tag); } return { id: generateUUID(), title: `${title} #${Math.floor(Math.random() * 1000)}`, description, priority, tags: cardTags, createdAt: Date.now() - Math.floor(Math.random() *
+            30 * 24 * 60 * 60 * 1000), lastModifiedAt: Date.now(), version: 1 }; } function generateSeedData(totalCards) { const lists=[ { id: generateUUID(), name: 'Backlog', archived: false, createdAt: Date.now(), lastModifiedAt: Date.now(), version: 1
+            }, { id: generateUUID(), name: 'To Do', archived: false, createdAt: Date.now(), lastModifiedAt: Date.now(), version: 1 }, { id: generateUUID(), name: 'In Progress', archived: false, createdAt: Date.now(), lastModifiedAt: Date.now(), version: 1
+            }, { id: generateUUID(), name: 'Review', archived: false, createdAt: Date.now(), lastModifiedAt: Date.now(), version: 1 }, { id: generateUUID(), name: 'Done', archived: false, createdAt: Date.now(), lastModifiedAt: Date.now(), version: 1 } ];
+            const distribution=[ 0.3, 0.25, 0.2, 0.15, 0.1]; const cards={ }; lists.forEach((list, index)=> { const numCards = Math.floor(totalCards * distribution[index]); cards[list.id] = []; for (let i = 0; i
+            < numCards; i++) { cards[list.id].push(generateCard(list.id)); } }); const currentTotal=O bject.values(cards).reduce((sum, arr)=> sum + arr.length, 0); const remaining = totalCards - currentTotal; if (remaining > 0) { for (let i = 0; i
+                < remaining; i++) { cards[lists[0].id].push(generateCard(lists[0].id)); } } return { lists, cards, version: 1, lastModifiedAt: Date.now()
+                    }; } window.generateData=f unction() { const numCards=p arseInt(document.getElementById( 'numCards').value); if (isNaN(numCards) || numCards < 1) { showOutput( '❌ Please enter a valid number of cards (minimum 1)', true); return; } showOutput(
+                    '🌱 Generating data...\n'); try { const data=g enerateSeedData(numCards); const totalCards=O bject.values(data.cards).reduce((sum, arr)=> sum + arr.length, 0); localStorage.setItem('kanban-board', JSON.stringify(data)); showOutput(`✅ Success!\n\n📊 Generated:\n - ${data.lists.length} lists\n - ${totalCards} cards\n - ${(JSON.stringify(data).length / 1024).toFixed(2)} KB\n\n✨
+                    Refresh your Kanban Board to see the data!`); updateCurrentData(); } catch (error) { showOutput(`❌ Error: ${error.message}`, true); } }; window.viewData = function() { const data = localStorage.getItem('kanban-board'); if (!data) {
+                    showOutput('ℹ️ No data found in localStorage', false); return; } try { const parsed = JSON.parse(data); const totalCards = Object.values(parsed.cards).reduce((sum, arr) => sum + arr.length, 0); showOutput(`📊 Current Data:\n\n - Lists:
+                    ${parsed.lists.length}\n - Total Cards: ${totalCards}\n - Data Size: ${(data.length / 1024).toFixed(2)} KB\n\n${JSON.stringify(parsed, null, 2).substring(0, 1000)}...\n\n(Showing first 1000 characters)`); } catch (error) { showOutput(`❌
+                    Error parsing data: ${error.message}`, true); } }; window.clearData = function() { if (confirm('⚠️ Are you sure you want to clear all data? This cannot be undone.')) { localStorage.removeItem('kanban-board'); showOutput('✅ All data
+                    cleared successfully!'); updateCurrentData(); } }; function showOutput(message, isError = false) { const output = document.getElementById('output'); output.textContent = message; output.style.display = 'block'; output.className = isError
+                    ? 'error' : ''; } function updateCurrentData() { const data = localStorage.getItem('kanban-board'); const currentDataEl = document.getElementById('currentData'); if (!data) { currentDataEl.textContent = 'No data in localStorage'; return;
+                    } try { const parsed = JSON.parse(data); const totalCards = Object.values(parsed.cards).reduce((sum, arr) => sum + arr.length, 0); currentDataEl.innerHTML = ` ${parsed.lists.length} lists, ${totalCards} cards (${(data.length / 1024).toFixed(2)}
+                    KB) `; } catch (error) { currentDataEl.textContent = 'Error reading data'; } } // Initialize updateCurrentData();
+    </script>
+</body>
+
+</html>

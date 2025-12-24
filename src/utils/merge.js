@@ -25,7 +25,7 @@ export function threeWayMerge(base, local, server) {
     const fields = ['title', 'description', 'tags', 'archived', 'order'];
 
     fields.forEach((field) => {
-        const baseValue = base?.[field];
+        const baseValue = base ? .[field];
         const localValue = local[field];
         const serverValue = server[field];
 
@@ -66,7 +66,7 @@ export function mergeBoardState(baseState, localState, serverState) {
     ]);
 
     allListIds.forEach((listId) => {
-        const baseList = baseState?.lists?.find((l) => l.id === listId);
+        const baseList = baseState ? .lists ? .find((l) => l.id === listId);
         const localList = localState.lists.find((l) => l.id === listId);
         const serverList = serverState.lists.find((l) => l.id === listId);
 
@@ -112,7 +112,7 @@ export function mergeBoardState(baseState, localState, serverState) {
     allListIds.forEach((listId) => {
         const localCards = localState.cards[listId] || [];
         const serverCards = serverState.cards[listId] || [];
-        const baseCards = baseState?.cards?.[listId] || [];
+        const baseCards = baseState ? .cards ? .[listId] || [];
 
         const allCardIds = new Set([
             ...localCards.map((c) => c.id),

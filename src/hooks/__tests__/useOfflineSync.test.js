@@ -86,4 +86,3 @@ describe('useOfflineSync', () => {
         expect(result.current).toHaveProperty('syncError');
     });
 });
-

@@ -42,22 +42,23 @@ import { useState, useCallback, useRef, useEffect } from 'react';
  */
 export function useUndoRedo(initialState, maxHistorySize = 50) {
     // History stack stores all states
-    const [history, setHistory] = useState([{
+    // Use lazy initialization to avoid calling Date.now() during render
+    const [history, setHistory] = useState(() => [{
         state: initialState,
         timestamp: Date.now(),
     }]);
-    
+
     // Current position in history
     const [currentIndex, setCurrentIndex] = useState(0);
-    
+
     // Track if currently undoing/redoing to prevent double pushes
     const isNavigatingRef = useRef(false);
 
     // Sync currentState with history[currentIndex]
     const [currentState, setCurrentState] = useState(initialState);
-    
+
     useEffect(() => {
-        const newState = history[currentIndex]?.state || initialState;
+        const newState = history[currentIndex] ? .state || initialState;
         setCurrentState(newState);
     }, [currentIndex, history, initialState]);
 
@@ -84,7 +85,7 @@ export function useUndoRedo(initialState, maxHistorySize = 50) {
         setHistory((prevHistory) => {
             // Remove any states after current index (for branching)
             const newHistory = prevHistory.slice(0, currentIndex + 1);
-            
+
             // Add new state
             newHistory.push({
                 state: newState,
@@ -117,12 +118,12 @@ export function useUndoRedo(initialState, maxHistorySize = 50) {
 
         isNavigatingRef.current = true;
         setCurrentIndex((prevIndex) => prevIndex - 1);
-        
+
         setTimeout(() => {
             isNavigatingRef.current = false;
         }, 0);
 
-        return history[currentIndex - 1]?.state || currentState;
+        return history[currentIndex - 1] ? .state || currentState;
     }, [canUndo, currentIndex, currentState, history]);
 
     /**
@@ -136,12 +137,12 @@ export function useUndoRedo(initialState, maxHistorySize = 50) {
 
         isNavigatingRef.current = true;
         setCurrentIndex((prevIndex) => prevIndex + 1);
-        
+
         setTimeout(() => {
             isNavigatingRef.current = false;
         }, 0);
 
-        return history[currentIndex + 1]?.state || currentState;
+        return history[currentIndex + 1] ? .state || currentState;
     }, [canRedo, currentIndex, currentState, history]);
 
     /**
@@ -168,12 +169,12 @@ export function useUndoRedo(initialState, maxHistorySize = 50) {
 
         isNavigatingRef.current = true;
         setCurrentIndex(index);
-        
+
         setTimeout(() => {
             isNavigatingRef.current = false;
         }, 0);
 
-        return history[index]?.state || currentState;
+        return history[index] ? .state || currentState;
     }, [history, currentState]);
 
     /**
