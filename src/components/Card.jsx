@@ -1,4 +1,5 @@
 import { memo, useState, lazy, Suspense } from 'react';
+import LoadingFallback from './LoadingFallback';
 
 const CardDetailModal = lazy(() => import('./CardDetailModal'));
 
@@ -60,7 +61,7 @@ function Card({ card, listId }) {
       </div>
 
       {showModal && (
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<LoadingFallback message="Loading card details..." size="medium" />}>
           <CardDetailModal
             card={card}
             listId={listId}
